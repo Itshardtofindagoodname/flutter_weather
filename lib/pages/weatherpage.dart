@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
@@ -61,14 +63,17 @@ class _WeatherPageState extends State<WeatherPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.grey,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Fetching the weather for you..'),
-              Lottie.asset('assets/flyer.json'),
-            ],
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
+          child: AlertDialog(
+            backgroundColor: Colors.grey,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('Fetching the weather for you..'),
+                Lottie.asset('assets/flyer.json'),
+              ],
+            ),
           ),
         );
       },
@@ -111,12 +116,17 @@ class _WeatherPageState extends State<WeatherPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text(
+          title: Text(
             'WEATHERING INIT',
-            style: TextStyle(color: Colors.black),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+              color: Colors.grey.shade700,
+            ),
           ),
           automaticallyImplyLeading: false,
-          backgroundColor: Colors.grey,
+          shadowColor: Colors.black,
+          backgroundColor: Colors.grey.shade300,
           centerTitle: true,
           actions: [
             IconButton(
@@ -126,11 +136,11 @@ class _WeatherPageState extends State<WeatherPage> {
                   _showCityInput = true;
                 });
               },
-              color: Colors.black,
+              color: Colors.grey.shade700,
             ),
           ],
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.grey.shade300,
         body: SafeArea(
             child: Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -139,143 +149,212 @@ class _WeatherPageState extends State<WeatherPage> {
         )));
   }
 
-  Column _weatherpage(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (_showCityInput)
-          Padding(
-            padding: const EdgeInsets.only(left: 40, right: 40),
-            child: _input(context),
-          ),
-        if (!_showCityInput && _weather != null)
-          Animate(
-            effects: const [FadeEffect(delay: Duration(seconds: 2))],
-            child: Column(
-              children: [
-                Text(
-                  _weather?.cityName ?? "",
-                  style: const TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+  Container _weatherpage(BuildContext context) {
+    return Container(
+      height: 400,
+      width: 350,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.grey.shade300,
+          boxShadow: [
+            const BoxShadow(
+                offset: Offset(10, 10), color: Colors.black38, blurRadius: 20),
+            BoxShadow(
+                offset: const Offset(-10, -10),
+                color: Colors.white.withOpacity(0.85),
+                blurRadius: 20)
+          ]),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_showCityInput)
+              Padding(
+                padding: const EdgeInsets.only(left: 40, right: 40),
+                child: _input(context),
+              ),
+            if (!_showCityInput && _weather != null)
+              Animate(
+                effects: const [FadeEffect(delay: Duration(seconds: 2))],
+                child: Column(
+                  children: [
+                    Text(
+                      _weather?.cityName ?? "",
+                      style: const TextStyle(
+                          fontSize: 40,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                    ),
+                    Lottie.asset(getWeatherAnimation(_weather?.mainCondition)),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Text(' ${_weather?.temperature.roundToDouble() ?? ""}°C',
+                        style:
+                            const TextStyle(fontSize: 30, color: Colors.black)),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      _weather?.mainCondition ?? "",
+                      style: const TextStyle(fontSize: 20, color: Colors.black),
+                    )
+                  ],
                 ),
-                Lottie.asset(getWeatherAnimation(_weather?.mainCondition)),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(' ${_weather?.temperature.roundToDouble() ?? ""}°C',
-                    style: const TextStyle(fontSize: 30, color: Colors.white)),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  _weather?.mainCondition ?? "",
-                  style: const TextStyle(fontSize: 20, color: Colors.white),
-                )
-              ],
-            ),
-          ),
-      ],
+              ),
+          ],
+        ),
+      ),
     );
   }
 
   String _cityInputError = '';
-
-  Column _input(BuildContext context) {
-    return Column(
-      children: [
-        const Text(
-          'Enter your desired Location:',
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        const SizedBox(
-          height: 32,
-        ),
-        TextField(
-          controller: _cityController,
-          decoration: const InputDecoration(
-            labelText: 'City Name',
-            border: OutlineInputBorder(),
-            labelStyle: TextStyle(color: Colors.white),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
+  bool _isElevated = false;
+  BackdropFilter _input(BuildContext context) {
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+      child: Container(
+        height: 350,
+        width: 250,
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.grey.shade300,
+            boxShadow: [
+              const BoxShadow(
+                  offset: Offset(10, 10),
+                  color: Colors.black38,
+                  blurRadius: 20),
+              BoxShadow(
+                  offset: const Offset(-10, -10),
+                  color: Colors.white.withOpacity(0.85),
+                  blurRadius: 20)
+            ]),
+        child: Column(
+          children: [
+            Text(
+              'Enter your desired Location:',
+              style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
+            const SizedBox(
+              height: 32,
             ),
-            hintStyle: TextStyle(color: Colors.white),
-          ),
-          style: const TextStyle(
-            color: Colors.white,
-          ),
-          cursorColor: Colors.white,
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        Text(
-          _cityInputError,
-          style: const TextStyle(color: Colors.red),
-        ),
-        const SizedBox(height: 40),
-        Animate(
-          effects: const [FlipEffect(delay: Duration(seconds: 2))],
-          child: OutlinedButton(
-            onPressed: () async {
-              final cityName = _cityController.text;
-              if (cityName.isEmpty) {
-                setState(() {
-                  _cityInputError = 'City Name cannot be a Blank Space';
-                });
-              } else {
-                setState(() {
-                  _cityInputError = '';
-                });
-                final isValidCity = await validateCity(cityName);
-                if (isValidCity) {
-                  _fetchWeather(context);
-                } else {
+            Material(
+              shadowColor: Colors.grey,
+              borderRadius: BorderRadius.circular(10),
+              child: TextField(
+                controller: _cityController,
+                decoration: InputDecoration(
+                  labelText: 'City Name',
+                  border: const OutlineInputBorder(),
+                  labelStyle: TextStyle(color: Colors.grey.shade700),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey.shade400),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  hintStyle: TextStyle(color: Colors.grey.shade700),
+                ),
+                style: const TextStyle(
+                  color: Colors.black,
+                ),
+                cursorColor: Colors.grey.shade400,
+              ),
+            ),
+            const SizedBox(
+              height: 5,
+            ),
+            Text(
+              _cityInputError,
+              style: const TextStyle(color: Colors.red),
+            ),
+            const SizedBox(height: 60),
+            Animate(
+              effects: const [FlipEffect(delay: Duration(seconds: 2))],
+              child: GestureDetector(
+                onTap: () async {
                   setState(() {
-                    _cityInputError =
-                        'Couldn\'t find that location, please check the spelling or try another city.';
+                    _isElevated = !_isElevated;
                   });
-                }
-              }
-            },
-            style: ButtonStyle(
-              side: MaterialStateProperty.resolveWith(
-                (states) {
-                  if (states.contains(MaterialState.disabled)) {
-                    return const BorderSide(color: Colors.black);
+                  final cityName = _cityController.text;
+                  if (cityName.isEmpty) {
+                    setState(() {
+                      _cityInputError = 'City Name cannot be a Blank Space';
+                    });
+                  } else {
+                    setState(() {
+                      _cityInputError = '';
+                    });
+                    final isValidCity = await validateCity(cityName);
+                    if (isValidCity) {
+                      _fetchWeather(context);
+                    } else {
+                      setState(() {
+                        _cityInputError =
+                            'Couldn\'t find that location, please check the spelling or try another city.';
+                      });
+                    }
                   }
-                  return const BorderSide(color: Colors.black);
                 },
+                child: AnimatedContainer(
+                  duration: const Duration(
+                    milliseconds: 200,
+                  ),
+                  height: 50,
+                  width: 150,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(40),
+                    color: Colors.grey.shade300,
+                    shape: BoxShape.rectangle,
+                    boxShadow: _isElevated
+                        ? [
+                            const BoxShadow(
+                              color: Color(0xFFBEBEBE),
+                              offset: Offset(10, 10),
+                              blurRadius: 30,
+                              spreadRadius: 1,
+                            ),
+                            const BoxShadow(
+                              color: Colors.white,
+                              offset: Offset(-10, -10),
+                              blurRadius: 30,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        :
+                        // Depth Effect
+                        [
+                            const BoxShadow(
+                              color: Color(0xFFBEBEBE),
+                              offset: Offset(10, 10),
+                              blurRadius: 10,
+                              spreadRadius: -2,
+                            ),
+                            const BoxShadow(
+                              color: Colors.white,
+                              offset: Offset(-10, -10),
+                              blurRadius: 10,
+                              spreadRadius: -2,
+                            ),
+                          ],
+                  ),
+                  child: Icon(
+                    Icons.search_rounded,
+                    size: 40,
+                    color: _isElevated ? Colors.black45 : Colors.black26,
+                  ),
+                ),
               ),
-              foregroundColor: MaterialStateProperty.resolveWith(
-                (states) {
-                  if (states.contains(MaterialState.disabled)) {
-                    return Colors.black;
-                  }
-                  return Colors.black;
-                },
-              ),
-              backgroundColor: MaterialStateProperty.resolveWith(
-                (states) {
-                  if (states.contains(MaterialState.disabled)) {
-                    return Colors.white;
-                  }
-                  return Colors.white;
-                },
-              ),
-            ),
-            child: const Text(
-              'Get Weather',
-              style: TextStyle(fontSize: 18, color: Colors.black),
-            ),
-          ),
-        )
-      ],
+            )
+          ],
+        ),
+      ),
     );
   }
 }

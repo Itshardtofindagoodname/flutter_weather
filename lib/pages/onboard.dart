@@ -18,17 +18,17 @@ class _onBoardState extends State<onBoard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.grey.shade300,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Animate(
-              child: const Padding(
-                padding: EdgeInsets.all(20.0),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
                 child: Text(
                   'Your Personal Weather App.',
-                  style: TextStyle(fontSize: 30, color: Colors.white),
+                  style: TextStyle(fontSize: 30, color: Colors.grey.shade700),
                 ),
               ),
             ),
@@ -36,38 +36,25 @@ class _onBoardState extends State<onBoard> {
               effects: const [
                 FadeEffect(delay: Duration(seconds: 1)),
               ],
-              child: const Padding(
-                padding: EdgeInsets.all(16.0),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Text(
                   'Where you can search up the weather of any location in seconds.',
-                  style: TextStyle(fontSize: 20, color: Colors.grey),
+                  style: TextStyle(fontSize: 20, color: Colors.grey.shade500),
                 ),
               ),
             ),
-            Animate(
-              effects: const [BlurEffect(delay: Duration(seconds: 10))],
-              child: Lottie.asset('assets/hamster.json'),
-            ),
+            Lottie.asset('assets/hamster.json'),
             const SizedBox(height: 50),
             isLoading
-                ? const CircularProgressIndicator()
+                ? LinearProgressIndicator(
+                    backgroundColor: Colors.grey.shade500,
+                    color: Colors.white70,
+                    borderRadius: BorderRadius.circular(70))
                 : Animate(
                     effects: const [FadeEffect(delay: Duration(seconds: 1))],
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.white),
-                        padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                          const EdgeInsets.all(16.0),
-                        ),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                        ),
-                      ),
-                      onPressed: () {
+                    child: GestureDetector(
+                      onTap: () {
                         setState(() {
                           isLoading = true;
                         });
@@ -81,9 +68,37 @@ class _onBoardState extends State<onBoard> {
                           );
                         });
                       },
-                      child: const Text(
-                        'Click here to get started',
-                        style: TextStyle(fontSize: 20, color: Colors.black),
+                      child: AnimatedContainer(
+                        duration: const Duration(
+                          milliseconds: 200,
+                        ),
+                        height: 65,
+                        width: 250,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(40),
+                            color: Colors.grey[300],
+                            shape: BoxShape.rectangle,
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0xFFBEBEBE),
+                                offset: Offset(10, 10),
+                                blurRadius: 30,
+                                spreadRadius: 1,
+                              ),
+                              BoxShadow(
+                                color: Colors.white,
+                                offset: Offset(-10, -10),
+                                blurRadius: 30,
+                                spreadRadius: 1,
+                              ),
+                            ]),
+                        child: Center(
+                          child: Text(
+                            'Let\'s get going',
+                            style: TextStyle(
+                                fontSize: 25, color: Colors.grey.shade700),
+                          ),
+                        ),
                       ),
                     ),
                   )
